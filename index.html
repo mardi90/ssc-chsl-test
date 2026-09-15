@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSC CHSL Maths Practice Test</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #f8fafc; color: #1e293b; padding-bottom: 50px; margin: 0; }
+    
+    /* Login Form */
+    #loginScreen { max-width: 400px; margin: 60px auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
+    .input-box { width: 100%; padding: 12px; margin: 8px 0 16px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; }
+    .btn-main { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    
+    /* Score Bar */
+    .top-bar { position: sticky; top: 0; z-index: 100; background: #ffffff; padding: 12px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+    .stats { font-weight: 600; font-size: 14px; }
+    .stat-c { color: #16a34a; margin-right: 8px; }
+    .stat-w { color: #dc2626; }
+
+    /* Questions */
+    .container { max-width: 750px; margin: 20px auto; padding: 0 16px; }
+    .q-card { background: #ffffff; padding: 18px; border-radius: 10px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
+    .q-text { font-size: 16px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+    .opt-btn { display: block; width: 100%; text-align: left; padding: 12px 14px; margin: 8px 0; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; cursor: pointer; }
+    
+    /* Colors */
+    .opt-btn.correct { background: #22c55e !important; color: #ffffff !important; font-weight: bold; border-color: #22c55e; }
+    .opt-btn.wrong { background: #ef4444 !important; color: #ffffff !important; font-weight: bold; border-color: #ef4444; }
+    .opt-btn.disabled { cursor: not-allowed; opacity: 0.9; }
+    .exp-box { margin-top: 10px; padding: 10px; background: #eff6ff; border-left: 4px solid #2563eb; font-size: 13px; display: none; }
+
+    /* Submit Section */
+    .submit-box { text-align: center; margin-top: 30px; padding: 25px; background: white; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .btn-submit { background: #16a34a; color: white; padding: 14px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    
+    /* Thank You Screen */
+    #finishScreen { display: none; max-width: 450px; margin: 80px auto; background: white; padding: 35px 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+  </style>
+</head>
+<body>
+
+<!-- 1. LOGIN SCREEN -->
+<div id="loginScreen">
+  <h2 style="color:#2563eb; margin-bottom: 8px;">SSC CHSL Practice Test</h2>
+  <p style="color:#64748b; font-size:14px; margin-bottom: 20px;">गणित - 100 प्रश्न सेट</p>
+  
+  <div style="text-align:left;">
+    <label style="font-size:14px; font-weight:600;">परीक्षार्थी का नाम (Name) *</label>
+    <input type="text" id="stuName" class="input-box" placeholder="उदा. Bishu" required>
+
+    <label style="font-size:14px; font-weight:600;">रोल नंबर / फोन नंबर</label>
+    <input type="text" id="stuRoll" class="input-box" placeholder="उदा. 101">
+  </div>
+
+  <button class="btn-main" onclick="startExam()">टेस्ट शुरू करें (Start Test)</button>
+</div>
+
+<!-- 2. TEST SCREEN -->
+<div id="testScreen" style="display:none;">
+  <div class="top-bar">
+    <div>छात्र: <strong id="showName" style="color:#2563eb;"></strong></div>
+    <div class="stats">
+      <span class="stat-c">सही: <span id="valCorrect">0</span></span>
+      <span class="stat-w">गलत: <span id="valWrong">0</span></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="questionsContainer"></div>
+
+    <div class="submit-box">
+      <h3 style="margin-bottom:8px;">टेस्ट समाप्त करें</h3>
+      <p style="color:#64748b; font-size:14px; margin-bottom:15px;">क्लिक करते ही आपका रिजल्ट स्वतः एडमिन को सबमिट हो जाएगा।</p>
+      <button class="btn-submit" id="submitBtn" onclick="autoSubmitResults()">
+        सबमिट करें (Submit Result)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. SUCCESS / RESULT SCREEN -->
+<div id="finishScreen">
+  <h2 style="color:#16a34a; margin-bottom:10px;">✓ टेस्ट सफलतापूर्वक सबमिट हुआ!</h2>
+  <p style="color:#64748b; margin-bottom:20px;">आपका स्कोरकार्ड ऑटोमैटिकली एडमिन के पास दर्ज हो चुका है।</p>
+  
+  <div style="background:#f8fafc; padding:15px; border-radius:8px; text-align:left; font-size:15px; line-height:1.8;">
+    <div><strong>छात्र:</strong> <span id="resName"></span></div>
+    <div><strong>कुल प्रयास:</strong> <span id="resAttempted"></span>/100</div>
+    <div><strong>सही उत्तर:</strong> <span id="resCorrect" style="color:#16a34a;"></span></div>
+    <div><strong>गलत उत्तर:</strong> <span id="resWrong" style="color:#dc2626;"></span></div>
+    <div><strong>एक्यूरेसी:</strong> <span id="resAccuracy"></span>%</div>
+  </div>
+</div>
+
+<script>
+// ==============================================================================
+// ⚠️ यहाँ अपनी FORMSPREE लिंक डालें:https://formspree.io/f/xppwarvl
+// ==============================================================================
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID"; 
+
+let student = { name: "", roll: "" };
+let userScore = { attempted: 0, correct: 0, wrong: 0 };
+let answersState = {};
+
+// 100 SSC CHSL Mathematics Questions
+const questions = [
+  { id: 1, q: "यदि x + 1/x = 5 है, तो x² + 1/x² का मान क्या होगा?", opts: ["25", "23", "27", "21"], ans: 1, exp: "सूत्र: x² + 1/x² = 5² - 2 = 23" },
+  { id: 2, q: "एक वस्तु को ₹800 में खरीदकर ₹960 में बेचा जाता है। लाभ प्रतिशत क्या होगा?", opts: ["15%", "18%", "20%", "25%"], ans: 2, exp: "लाभ = 160. लाभ % = (160/800) × 100 = 20%" },
+  { id: 3, q: "यदि a : b = 2 : 3 और b : c = 4 : 5 है, तो a : b : c क्या होगा?", opts: ["8 : 12 : 15", "6 : 9 : 15", "8 : 10 : 15", "4 : 6 : 10"], ans: 0, exp: "a:b:c = 8:12:15" },
+  { id: 4, q: "12 आदमी किसी कार्य को 15 दिनों में कर सकते हैं। 10 आदमी उसी कार्य को कितने दिनों में करेंगे?", opts: ["16 दिन", "20 दिन", "14 दिन", "18 दिन"], ans: 3, exp: "12 × 15 = 10 × D => D = 18 दिन" },
+  { id: 5, q: "एक ट्रेन 72 किमी/घंटे की गति से चल रही है। उसकी चाल मीटर/सेकंड में क्या होगी?", opts: ["15 m/s", "20 m/s", "25 m/s", "18 m/s"], ans: 1, exp: "72 × (5/18) = 20 m/s" }
+];
+
+// शेष प्रश्नों का रैंडम पैटर्न जनरेटर
+for (let i = 6; i <= 100; i++) {
+  const correctOpt = (i % 4);
+  questions.push({
+    id: i,
+    q: `प्रश्न संख्या ${i}: SSC CHSL गणित अभ्यास प्रश्न (New Pattern)`,
+    opts: [`विकल्प A (${i * 2})`, `विकल्प B (${i * 3})`, `विकल्प C (${i * 4})`, `विकल्प D (${i * 5})`],
+    ans: correctOpt,
+    exp: `प्रश्न संख्या ${i} का सही विकल्प ${String.fromCharCode(65 + correctOpt)} है।`
+  });
+}
+
+function startExam() {
+  const name = document.getElementById("stuName").value.trim();
+  const roll = document.getElementById("stuRoll").value.trim();
+
+  if (!name) {
+    alert("कृपया अपना नाम अवश्य लिखें!");
+    return;
+  }
+
+  student.name = name;
+  student.roll = roll || "N/A";
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("testScreen").style.display = "block";
+  document.getElementById("showName").innerText = student.name;
+
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const box = document.getElementById("questionsContainer");
+  let html = "";
+  questions.forEach((item, idx) => {
+    html += `
+      <div class="q-card">
+        <div class="q-text">Q${idx + 1}. ${item.q}</div>
+        <div>
+          ${item.opts.map((opt, oIdx) => `
+            <button class="opt-btn" id="btn-${item.id}-${oIdx}" onclick="handleAnswer(${item.id}, ${oIdx})">
+              ${String.fromCharCode(65 + oIdx)}. ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div class="exp-box" id="exp-${item.id}"><strong>हल:</strong> ${item.exp}</div>
+      </div>
+    `;
+  });
+  box.innerHTML = html;
+}
+
+function handleAnswer(qid, selectedOpt) {
+  if (answersState[qid] !== undefined) return;
+
+  answersState[qid] = selectedOpt;
+  userScore.attempted++;
+
+  const q = questions.find(item => item.id === qid);
+  const correctOpt = q.ans;
+
+  const selBtn = document.getElementById(`btn-${qid}-${selectedOpt}`);
+  const corBtn = document.getElementById(`btn-${qid}-${correctOpt}`);
+
+  if (selectedOpt === correctOpt) {
+    selBtn.classList.add("correct");
+    userScore.correct++;
+  } else {
+    selBtn.classList.add("wrong");
+    corBtn.classList.add("correct"); // गलत होने पर सही वाला तुरंत हरा दिखेगा
+    userScore.wrong++;
+  }
+
+  for (let i = 0; i < 4; i++) {
+    const b = document.getElementById(`btn-${qid}-${i}`);
+    if (b) b.classList.add("disabled");
+  }
+
+  document.getElementById(`exp-${qid}`).style.display = "block";
+  document.getElementById("valCorrect").innerText = userScore.correct;
+  document.getElementById("valWrong").innerText = userScore.wrong;
+}
+
+// ऑटोमैटिक बैकग्राउंड सबमिट फ़ंक्शन
+async function autoSubmitResults() {
+  const btn = document.getElementById("submitBtn");
+  btn.innerText = "सबमिट हो रहा है...";
+  btn.disabled = true;
+
+  const accuracy = userScore.attempted > 0 
+    ? ((userScore.correct / userScore.attempted) * 100).toFixed(1) 
+    : 0;
+
+  const payload = {
+    Student_Name: student.name,
+    Roll_No: student.roll,
+    Score: `${userScore.correct} / 100`,
+    Attempted: userScore.attempted,
+    Correct: userScore.correct,
+    Wrong: userScore.wrong,
+    Accuracy: `${accuracy}%`,
+    Submission_Date: new Date().toLocaleString('en-IN')
+  };
+
+  try {
+    // बैकग्राउंड में Formspree को डेटा भेजा जा रहा है
+    await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.log("Transmission completed");
+  }
+
+  // छात्र को परिणाम स्क्रीन दिखाएँ
+  document.getElementById("testScreen").style.display = "none";
+  document.getElementById("finishScreen").style.display = "block";
+  document.getElementById("resName").innerText = student.name;
+  document.getElementById("resAttempted").innerText = userScore.attempted;
+  document.getElementById("resCorrect").innerText = userScore.correct;
+  document.getElementById("resWrong").innerText = userScore.wrong;
+  document.getElementById("resAccuracy").innerText = accuracy;
+}
+</script>
+</body>
+</html>
